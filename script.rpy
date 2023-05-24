@@ -1,4 +1,4 @@
-﻿# The script of the game goes in this file.
+# The script of the game goes in this file.
 
 
 init -1:
@@ -15,11 +15,11 @@ init -1:
                     id "namebox"
                     style "namebox"
                     text who id "who"
-            
-            # FancyText: Here's where all the magic happens.
-            # Replace your usual "text" statement with "fancytext" to enable
-            # some fancy effects on text display.
-            fancytext what id "what" slow_effect slow_effect slow_effect_delay slow_effect_delay always_effect always_effect
+                    
+            text what id "what":
+                slow_effect slow_effect 
+                slow_effect_delay slow_effect_delay 
+                always_effect always_effect
 
 define e = Character("Eileen")
 define s = Character("Shaky", show_always_effect = always_shake(x = 1, y = 1))
@@ -35,6 +35,8 @@ label start:
     # Show a background. This uses a placeholder by default, but you can
     # add a file (named either "bg room.png" or "bg room.jpg") to the
     # images directory to show it.
+    
+    show screen adjust_text_speed
 
     scene bg room
 
@@ -63,3 +65,25 @@ label start:
     # This ends the game.
 
     return
+    
+style adjust_text_speed_vbox:
+    align (0.5,0.5)
+    xysize (500,200)
+style adjust_text_speed_label_text:
+    align (0.5,0.5)
+    text_align 0.5
+    color gui.accent_color
+    outlines [(2,"#0009",1,1)]
+style adjust_text_speed_label:
+    align (0.5,0.5)
+style adjust_text_speed_bar:
+    align(0.5,0.5)
+    xsize 400
+
+
+
+screen adjust_text_speed():
+    style_prefix "adjust_text_speed"
+    vbox:
+        label _("Text Speed")
+        bar value Preference("text speed")
