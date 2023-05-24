@@ -17,7 +17,7 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-python early:
+init -1500 python early:
 
     def slow_typewriter(st, gt, delay):
         return Transform()
@@ -337,9 +337,12 @@ python early:
                         )
                         
                         # Apply alpha
-                        char.add_shader("renpy.alpha")
-                        char.add_uniform("u_renpy_alpha", trans.alpha)
-                        char.add_uniform("u_renpy_over", 1.0)
+                        if renpy.version_tuple[:-1] > (7,4,4):
+                            char.add_shader("renpy.alpha")
+                            char.add_uniform("u_renpy_alpha", trans.alpha)
+                            char.add_uniform("u_renpy_over", 1.0)
+                        elif renpy.version_tuple[:-1] < (7,4,5):
+                            char.alpha = trans.alpha
                     
                     else:
                         char.absolute_blit(
@@ -384,12 +387,23 @@ python early:
                 rv.blit(drend, (0, 0))
 
             # Add in the focus areas.
-            for hyperlink, hx, hy, hw, hh in layout.hyperlinks:
+            try:
+                for hyperlink, hx, hy, hw, hh in layout.hyperlinks:
 
-                h_x, h_y = layout.unscale_pair(hx + layout.xoffset, hy + layout.yoffset)
-                h_w, h_h = layout.unscale_pair(hw, hh)
+                    h_x, h_y = layout.unscale_pair(hx + layout.xoffset, hy + layout.yoffset)
+                    h_w, h_h = layout.unscale_pair(hw, hh)
 
-                rv.add_focus(self, hyperlink, h_x, h_y, h_w, h_h)
+                    rv.add_focus(self, hyperlink, h_x, h_y, h_w, h_h)
+
+            except:
+                for hyperlink, hx, hy, hw, hh, valid_st in layout.hyperlinks:
+
+                    if st >= valid_st or not self.slow:
+
+                        h_x, h_y = layout.unscale_pair(hx + layout.xoffset, hy + layout.yoffset)
+                        h_w, h_h = layout.unscale_pair(hw, hh)
+
+                        rv.add_focus(self, hyperlink, h_x, h_y, h_w, h_h)
 
             # Figure out if we need to redraw or call slow_done.
             if self.slow and not self.always_effect and not redraw is None:
@@ -399,7 +413,14 @@ python early:
                 renpy.display.render.redraw(self, 0)
             
             if self.slow and redraw is None:
-                self.call_slow_done(st)
+                try:
+                    self.slow = False
+                    self.call_slow_done(st)
+                    renpy.game.interface.timeout(0)
+                except:
+                    self.slow = False
+                    self.slow_done()
+                    renpy.game.interface.timeout(0)
 
             rv.forward = layout.forward
             rv.reverse = layout.reverse
@@ -508,7 +529,7 @@ python early:
 
 ################################################################################
 
-    renpy.register_sl_displayable("fancytext", FancyText, "text", 0, scope=True, replaces=True) \
+    renpy.register_sl_displayable("text", FancyText, "text", 0, scope=True, replaces=True) \
         .add_positional("text") \
         .add_property("slow_effect") \
         .add_property("slow_effect_delay") \
