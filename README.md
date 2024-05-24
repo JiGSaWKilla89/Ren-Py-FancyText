@@ -1,6 +1,6 @@
 # Ren'Py FancyText Module
 
-FancyText is a drop-in module for Ren'Py 7.3.5 that lets you display text on screens with a little more pizazz than vanilla.
+FancyText is a drop-in module for Ren'Py 7.3.5 up to Ren'Py 8.2.1 that lets you display text on screens with a little more pizazz than vanilla.
 
 ![Sample](./example.gif)
 
